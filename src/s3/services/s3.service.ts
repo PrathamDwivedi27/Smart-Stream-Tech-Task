@@ -8,6 +8,9 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+interface S3File {
+  Key: string | undefined;
+}
 
 @Injectable()
 export class S3Service {
@@ -34,20 +37,20 @@ export class S3Service {
 
       if (!response.Contents) return [];
 
-      // Generate Signed URLs
-      const mp4Files | [] = await Promise.all(
-        response.Contents.filter((file) => file.Key && file.Key.endsWith('.mp4'))
-          .map(async (file) => {
+      const mp4Files: string[] = await Promise.all(
+        (response.Contents as S3File[])
+          .filter((file: S3File) => file.Key && file.Key.endsWith('.mp4'))
+          .map(async (file: S3File) => {
             if (!file.Key) {
               throw new Error('File key is undefined');
             }
-            const url = await getSignedUrl(
+            const url: string = await getSignedUrl(
               this.s3,
               new GetObjectCommand({ Bucket: this.bucketName, Key: file.Key }),
-            //   { expiresIn: 3600 } // URL valid for 1 hour
+              // { expiresIn: 3600 } // URL valid for 1 hour
             );
-          return url;
-        }),
+            return url;
+          }),
       );
 
       console.log('MP4 Signed URLs:', mp4Files);
