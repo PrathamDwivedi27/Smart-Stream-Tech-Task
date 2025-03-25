@@ -47,13 +47,13 @@ export class S3Service {
             const url: string = await getSignedUrl(
               this.s3,
               new GetObjectCommand({ Bucket: this.bucketName, Key: file.Key }),
-              // { expiresIn: 3600 } // URL valid for 1 hour
+              { expiresIn: 42600 },
             );
             return url;
           }),
       );
 
-      console.log('MP4 Signed URLs:', mp4Files);
+      // console.log('MP4 Signed URLs:', mp4Files);
       return mp4Files;
     } catch (error) {
       console.error('Error fetching files:', error);
